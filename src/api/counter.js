@@ -12,4 +12,5 @@ export const postCount = async(newValue) => {
 
 export const deleteCount = async() => {
     const { data } = await instance.delete(`/counter`)
+    return data
 }
