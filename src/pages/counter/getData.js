@@ -10,5 +10,9 @@ export const getHistory = (result) => {
 export const getData = async () => {
     const result = await getCount();
     const history = getHistory(result);
+    if(history.length <= 0) {
+        return {count:0, history: []}
+    }
+    
     return { count: result[0].value, history };
 };
