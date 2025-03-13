@@ -11,3 +11,9 @@ root.render(
         <App />
     </Provider>
 );
+/*
+    const init = {
+        count: 0,
+        history: []
+    }
+*/

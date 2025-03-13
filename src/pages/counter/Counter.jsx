@@ -1,24 +1,25 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux";
-import { getHistory, getInit } from "./getData";
-import { INCREMENT, DECREMENT, SETDATA, RESET } from "../../store/counterReducer"
-import { getCount, postCount, deleteCount } from "../../api/counter";
+import { COUNT_INCREMENT, COUNT_DECREMENT } from "../../reducers/counterReducer"
+import { fetchSetData, updateCount } from "../../actions"
 
-const Left = ({handleDispatch}) => {
-    const {count} = useSelector((state) => state);
-
+const Left = () => {
+    const { count } = useSelector((state) => state.count);
+    const dispatch = useDispatch();
+    
     return (
         <>
             {count}
-            <button onClick={() => handleDispatch(INCREMENT, count + 1)}>+</button>
-            <button onClick={() => handleDispatch(DECREMENT, count - 1)}>-</button>
-            <button onClick={() => handleDispatch(RESET)}>RESET</button>
+            <button onClick={() => dispatch(updateCount(COUNT_INCREMENT, count + 1))}>+</button>
+            <button onClick={() => dispatch(updateCount(COUNT_DECREMENT, count - 1))}>-</button>
         </>
     )
 }
 
 const Right = () => {
-    const {history} = useSelector((state) => state);
+    const { history } = useSelector((state) => state.count);
+
+    if(history.length <= 0) return <>값이 존재하지 않습니다.</>
     return (
         <ul>
             {history.map((value) => (
@@ -31,53 +32,16 @@ const Right = () => {
 }
 
 export const Counter = () => {
-    // 전역 상태 가져오기 => useSelector
-    // 전역 상태 바꾸기 => useDispatch
-    // const {state} = useCounter
-    const { history } = useSelector((state) => state);
     const dispatch = useDispatch();
 
     // 초기값
     useEffect(()=> {
-        const fetchData = async() => {
-            try {
-                const data = await getInit();
-                dispatch({ type: SETDATA, payload: data });
-            } catch (error) {
-                console.error("초기 데이터 로딩 실패", error);
-            }
-        }
-        fetchData()
-    }, [])
-    // type: "INCREMENT" | "DECREMENT" | "RESET"
-    const handleDispatch = async (type, newValue) => {
-        try {
-            if (type === RESET) {
-                await deleteCount(newValue); 
-            } else {
-                await postCount(newValue); // 새로운 값 저장
-            }
-            
-            const result = await getCount(); // 최신 데이터 불러오기
-
-            if(result.length === 0) {
-                return dispatch({ type, payload: { count: 0, history: []}});
-            }
-            
-            const updatedHistory = getHistory(result);
-            
-
-            return dispatch({ type, payload: { count: result[0].value, history: updatedHistory}});
-        } catch (error) {
-            console.error("Counter 기능 실패...", error);
-        }
-    };
-    
-    if(history.length < 0) return <>값이 존재하지 않습니다.</>
+        dispatch(fetchSetData());
+    }, [dispatch])
     
     return (
         <>
-            <Left handleDispatch={handleDispatch}/>
+            <Left/>
             <Right/>
         </>
     )
